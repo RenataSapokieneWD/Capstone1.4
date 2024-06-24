@@ -1,0 +1,14 @@
+[
+    {"question_id": 1, "text": "What is credit block?", "options": ["A", "B", "C", "D"], "correct_option": "C"},
+    {"question_id": 2, "text": "Why orders are being blocked?", "options": ["A", "B", "C", "D"], "correct_option": "A"},
+    {"question_id": 3, "text": "What is DSO?", "options": ["A", "B", "C", "D"], "correct_option": "D"},
+    {"question_id": 4, "text": "What is credit limit?", "options": ["A", "B", "C", "D"], "correct_option": "D"},
+    {"question_id": 5, "text": "What is credit Catalyst?", "options": ["A", "B", "C", "D"], "correct_option": "B"},
+    {"question_id": 6, "text": "What is payment terms?", "options": ["A", "B", "C", "D"], "correct_option": "B"},
+    {"question_id": 7, "text": "Why it is important to check credit exposure?", "options": ["A", "B", "C", "D"], "correct_option": "A"},
+    {"question_id": 8, "text": "Which amount refers to overdues?", "options": ["A", "B", "C", "D"], "correct_option": "C"},
+    {"question_id": 9, "text": "What is dunning letter?", "options": ["A", "B", "C", "D"], "correct_option": "B"},
+    {"question_id": 10, "text": "How often do we send dunning letters?", "options": ["A", "B", "C", "D"], "correct_option": "A"}
+]
+
+

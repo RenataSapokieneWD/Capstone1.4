@@ -1,4 +1,6 @@
+import re
 import os
+import sys
 import subprocess
 import random
 import smtplib
@@ -9,7 +11,14 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from datetime import datetime
 
-email = input("Enter your email: ").lower().strip()
+email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+while True:
+    email = input("Enter your email: ").lower().strip()
+    if re.match(email_pattern, email):
+        break
+    else:
+        print("Invalid email format. Please enter a valid email address.")
+
 
 load_dotenv()
 teams = {
@@ -39,7 +48,7 @@ def main_menu():
     users = load_users_from_csv('teams.csv')
 
     while True:
-        name = input("Enter your name: ").capitalize().strip()
+        name = input("Enter your first name: ").capitalize().strip()
         surname = input("Enter your surname: ").capitalize().strip()
 
         region = validate_user_input(name, surname, email, users)
@@ -65,52 +74,111 @@ def main_menu():
                     view_statistics()
                 elif choice == "4":
                     print("Thank you for using our tool. Goodbye!")
-                    return
+                    sys.exit()
                 else:
                     print("Invalid choice, please try again.")
         else:
             print("No matching user found. Please check your details and try again.")
 
-def open_folder(folder_path):
-    try:
-        if os.path.exists(folder_path):
-            print(f"Opening folder: {folder_path}")
-            if sys.platform.startswith('win32'):  # For Windows
-                subprocess.Popen(['explorer', folder_path])
-            elif sys.platform.startswith('darwin'):  # For macOS
-                subprocess.Popen(['open', folder_path])
-            else:  # For Linux and other Unix-like systems
-                subprocess.Popen(['xdg-open', folder_path])
-        else:
-            print(f"Folder does not exist: {folder_path}")
-    except Exception as e:
-        print(f"An error occurred while opening the folder: {e}")
 
 def read_theory():
-    topics = ["Blocked orders", "Credit limit assessments", "Collections"]
+    topics = ["Blocked orders", "Credit limit assessments", "Collections", "Go back to the main menu"]
 
     while True:
         print("\nSelect a topic to read:")
         for i, topic in enumerate(topics):
             print(f"{i + 1}. {topic}")
-        choice = int(input("Enter your choice: ")) - 1
 
-        if 0 <= choice < len(topics):
-            topic = topics[choice]
-            if topic == "Blocked orders":
-                folder_path = r"C:\Users\vilsapokre\capstone\Blocked orders"
-                open_folder(folder_path)
-            elif topic == "Credit limit assessments":
-                folder_path = r"C:\Users\vilsapokre\capstone\Credit limit assessments"
-                open_folder(folder_path)
-            elif topic == "Collections":
-                folder_path = r"C:\Users\vilsapokre\capstone\Collections"
-                open_folder(folder_path)
+        try:
+            choice = int(input("Enter your choice: ")) - 1
+
+            if 0 <= choice < len(topics):
+                topic = topics[choice]
+                if topic == "Go back to the main menu":
+                    print("Returning to the main menu...")
+                    break
+                else:
+                    file_path = select_file(topic)
+                    if file_path:
+                        open_file(file_path)
+                    else:
+                        print("Invalid topic choice. Please select again.")
             else:
                 print("Invalid topic choice. Please select again.")
-                continue
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
+def select_file(topic):
+    while True:
+        if topic == "Blocked orders":
+            print("\nSelect a file to open:")
+            print("1. blocked_orders.docx (Word)")
+            print("2. blocked_orders.pptx (PowerPoint)")
+        elif topic == "Credit limit assessments":
+            print("\nSelect a file to open:")
+            print("1. credit_limit_assessment.docx (Word)")
+            print("2. credit_limit_assessment.pptx (PowerPoint)")
+        elif topic == "Collections":
+            print("\nSelect a file to open:")
+            print("1. collections.docx (Word)")
         else:
-            print("Invalid topic choice. Please select again.")
+            print("Invalid topic.")
+            return None
+
+        try:
+            file_choice = int(input("Enter your choice: "))
+            main_dir = "capstone1.4"
+            if topic == "Blocked orders":
+                if file_choice == 1:
+                    file_path = os.path.join(main_dir, "blocked_orders", "blocked_orders.docx")
+                elif file_choice == 2:
+                    file_path = os.path.join(main_dir, "blocked_orders", "blocked_orders.pptx")
+                else:
+                    print("Invalid choice. Please enter 1 or 2.")
+                    continue
+            elif topic == "Credit limit assessments":
+                if file_choice == 1:
+                    file_path = os.path.join(main_dir, "credit_limit_assessment", "credit_limit_assessment.docx")
+                elif file_choice == 2:
+                    file_path = os.path.join(main_dir, "credit_limit_assessment", "credit_limit_assessment.pptx")
+                else:
+                    print("Invalid choice. Please enter 1 or 2.")
+                    continue
+            elif topic == "Collections":
+                if file_choice == 1:
+                    file_path = os.path.join(main_dir, "collections", "collections.docx")
+                else:
+                    print("Invalid choice. Please enter 1.")
+                    continue
+            return file_path
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
+def open_file(file_path):
+    try:
+        if os.path.exists(file_path):
+            print(f"Opening file: {file_path}")
+            if file_path.endswith('.docx'):
+                if sys.platform.startswith('win'):
+                    subprocess.Popen(['start', 'winword', file_path], shell=True)
+                elif sys.platform.startswith('darwin'):
+                    subprocess.Popen(['open', file_path])
+                else:
+                    subprocess.Popen(['xdg-open', file_path])
+            elif file_path.endswith('.pptx'):
+                if sys.platform.startswith('win'):
+                    subprocess.Popen(['start', 'powerpnt', file_path], shell=True)
+                elif sys.platform.startswith('darwin'):
+                    subprocess.Popen(['open', file_path])
+                else:
+                    subprocess.Popen(['xdg-open', file_path])
+        else:
+            print(f"File does not exist: {file_path}")
+    except Exception as e:
+        print(f"An error occurred while opening the file: {e}")
+
 
 def load_questions(filename):
     with open(filename, 'r', encoding='utf-8') as file:
@@ -130,21 +198,22 @@ def test_mode(name, surname, email, team_lead):
             print(f"\nQuestion {i+1}: {q['text']}")
             for j, option in enumerate(options):
                 print(f"{j + 1}. {option}")
-            answer = input("Enter your choice: ").upper()
-
-            if options[int(answer) - 1] == q['correct_option']:
-                print("Correct!")
-                score += 1
-                break
-            else:
-                print("Incorrect, please try again.")
-                attempts[q["text"]] += 1
-                if attempts[q["text"]] == 3:
-                    print(f"The correct answer is: {q['correct_option']}")
-
-    print(f"\n{name} {surname}, your test is complete.")
-    print(f"Score: {score} out of 4.")
-    print(f"Type of score: {type(score)}")  # Debug print
+            try:
+                answer = int(input("Enter your choice: "))
+                if 1 <= answer <= len(options):
+                    if options[answer - 1] == q['correct_option']:
+                        print("Correct!")
+                        score += 1
+                        break
+                    else:
+                        print("Incorrect, please try again.")
+                        attempts[q["text"]] += 1
+                        if attempts[q["text"]] == 3:
+                            print(f"The correct answer is: {q['correct_option']}")
+                else:
+                    print("Invalid choice. Please enter a number corresponding to the options.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
 
     result = (score / 4) * 100
     if result >= 90:
@@ -152,15 +221,16 @@ def test_mode(name, surname, email, team_lead):
         send_email(email, team_lead['email'], name, surname, result)
     else:
         print("You did not pass the test. Please try again.")
-    save_results(score, len(test_questions))
+    save_results(name, surname, score, len(test_questions))
 
-def save_results(score, num_questions):
+
+def save_results(name, surname, score, num_questions):
     results_path = 'results.txt'
     percentage = (score / num_questions) * 100
     rounded_percentage = round(percentage, 2)
 
     with open(results_path, 'a') as file:
-        file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Email: {email} - Score: {score}/{num_questions} - Percentage: {rounded_percentage}%\n")
+        file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Name: {name} {surname} - Email: {email} - Score: {score}/{num_questions} - Percentage: {rounded_percentage}%\n")
         print("Results saved successfully!")
 
 def send_email(user_email, lead_email, name, surname, score):
